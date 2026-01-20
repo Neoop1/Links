@@ -1,0 +1,45 @@
+Below is a PowerShell script to disable the lock screen for the currently logged-in user on Windows Server 2022.
+
+This uses the user policy registry key (HKCU), which is the correct approach when you want it per-user, not system-wide.
+
+✅ PowerShell script (per-user)
+# Disable Lock Screen for current user
+
+$RegPath = "HKCU:\SOFTWARE\Policies\Microsoft\Windows\Personalization"
+
+# Create key if it doesn't exist
+if (-not (Test-Path $RegPath)) {
+    New-Item -Path $RegPath -Force | Out-Null
+}
+
+# Set NoLockScreen value
+New-ItemProperty `
+    -Path $RegPath `
+    -Name "NoLockScreen" `
+    -PropertyType DWORD `
+    -Value 1 `
+    -Force | Out-Null
+
+Write-Output "Lock screen disabled for current user."
+
+🔄 Apply immediately (no reboot)
+gpupdate /force
+
+
+User must log out and back in for full effect.
+
+❌ To re-enable lock screen (undo)
+Remove-ItemProperty `
+    -Path "HKCU:\SOFTWARE\Policies\Microsoft\Windows\Personalization" `
+    -Name "NoLockScreen" `
+    -ErrorAction SilentlyContinue
+
+⚠️ Important notes (Server 2022)
+
+Works on Windows Server 2022 (Desktop Experience)
+
+Applies only to the current user
+
+Does not affect RDP session timeout / screen saver lock
+
+If a domain GPO enforces lock screen, it will override this
