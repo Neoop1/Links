@@ -1,0 +1,41 @@
+PowerShell Script: Disable Ctrl+Alt+Del Requirement
+# Disable Ctrl+Alt+Del requirement for logon
+$RegPath = "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System"
+
+# Create the key if it doesn't exist
+if (-not (Test-Path $RegPath)) {
+    New-Item -Path $RegPath -Force | Out-Null
+}
+
+# Set the value for disabling Ctrl+Alt+Del
+New-ItemProperty `
+    -Path $RegPath `
+    -Name "DisableCAD" `
+    -PropertyType DWORD `
+    -Value 1 `
+    -Force | Out-Null
+
+Write-Output "Ctrl+Alt+Del requirement has been disabled."
+
+🔄 Force Group Policy Update (Optional)
+
+If you'd like the changes to take effect immediately (without rebooting), run:
+
+gpupdate /force
+
+❌ Revert to Default (Enable Ctrl+Alt+Del Requirement)
+
+If you ever want to re-enable the Ctrl+Alt+Del requirement, you can run the following:
+
+Remove-ItemProperty `
+    -Path "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System" `
+    -Name "DisableCAD" `
+    -ErrorAction SilentlyContinue
+
+Write-Output "Ctrl+Alt+Del requirement has been re-enabled."
+
+⚠️ Notes
+
+This setting affects all users on the machine (since it's under HKLM).
+
+Security Considerations: Disabling Ctrl+Alt+Del reduces a security feature that helps prevent malicious software from hijacking the logon screen. Ensure that your environment has adequate other security measures if you choose to disable this.
